@@ -17,9 +17,6 @@
       --text-main: #1F2937;
       --text-muted: #6B7280;
       --border: #E5E7EB;
-      --success: #10B981;
-      --warning: #F59E0B;
-      --danger: #EF4444;
       --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     }
 
@@ -67,38 +64,43 @@
     .btn-primary { background: var(--primary); color: white; }
     .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
     .btn-secondary:hover { background: var(--border); }
+    .btn-xs { padding: 4px 10px; font-size: 0.75rem; border-radius: 4px; background: var(--bg-body); border: 1px solid var(--border); color: var(--text-muted); margin-top: 5px; }
+    .btn-xs:hover { color: var(--primary); border-color: var(--primary); }
     
     /* --- TABLA --- */
     .table-container { background: var(--bg-card); border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
     .table-responsive { overflow-x: auto; }
     
     table { width: 100%; border-collapse: collapse; white-space: nowrap; }
-    th, td { padding: 14px 20px; text-align: left; border-bottom: 1px solid var(--border); }
+    th, td { padding: 14px 20px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
     th { background: var(--bg-body); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; color: var(--text-muted); user-select: none; }
     tr:hover { background-color: rgba(0,0,0,0.02); }
     body.dark tr:hover { background-color: rgba(255,255,255,0.02); }
     
     .money { font-family: 'Courier New', monospace; font-weight: 700; color: var(--text-main); }
     
+    /* Estilos especificos para detalle */
+    .col-detalle { 
+        white-space: normal; 
+        min-width: 250px; 
+        max-width: 350px; 
+    }
+    .detalle-texto {
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Muestra maximo 2 lineas */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
     /* Botones de tabla */
     .btn-wa { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; text-decoration: none; font-size: 1rem; transition: background 0.2s; }
-    .btn-wa-client { background: #DCFCE7; color: #166534; } /* Verde suave */
+    .btn-wa-client { background: #DCFCE7; color: #166534; } 
     .btn-wa-client:hover { background: #BBF7D0; }
-    .btn-wa-support { background: #FEF3C7; color: #92400E; } /* Naranja suave */
+    .btn-wa-support { background: #FEF3C7; color: #92400E; } 
     .btn-wa-support:hover { background: #FDE68A; }
-
-    /* Tooltip simple */
-    [data-tooltip]:hover::after {
-        content: attr(data-tooltip);
-        position: absolute;
-        background: #333;
-        color: white;
-        padding: 4px 8px;
-        font-size: 12px;
-        border-radius: 4px;
-        transform: translateY(-120%);
-        white-space: nowrap;
-    }
 
     /* Paginación */
     #pager { padding: 15px; display: flex; justify-content: center; gap: 5px; }
@@ -114,6 +116,31 @@
         backdrop-filter: blur(2px);
     }
     body.dark #loading-overlay { background: rgba(0,0,0,0.8); }
+
+    /* --- MODAL (NUEVO) --- */
+    .modal-overlay {
+        display: none; 
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6); z-index: 2000;
+        justify-content: center; align-items: center;
+        backdrop-filter: blur(3px);
+    }
+    .modal-content {
+        background: var(--bg-card);
+        width: 90%; max-width: 500px;
+        border-radius: 12px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        display: flex; flex-direction: column;
+        max-height: 80vh;
+        animation: slideIn 0.2s ease-out;
+    }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-weight: 600; font-size: 1.1rem; }
+    .modal-close { cursor: pointer; font-size: 1.2rem; color: var(--text-muted); }
+    .modal-body { padding: 20px; overflow-y: auto; line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap; } /* pre-wrap mantiene saltos de linea */
+    .modal-footer { padding: 15px 20px; border-top: 1px solid var(--border); text-align: right; }
 
     @media (max-width: 768px) {
         .filters-grid { grid-template-columns: 1fr; }
@@ -218,6 +245,20 @@
 
   </div>
 
+  <div id="detailModal" class="modal-overlay">
+      <div class="modal-content">
+          <div class="modal-header">
+              <div class="modal-title">Detalle Completo <span id="modalId" style="color:var(--primary); font-size:0.9em; margin-left:5px"></span></div>
+              <div class="modal-close" onclick="closeDetail()"><i class="fas fa-times"></i></div>
+          </div>
+          <div class="modal-body" id="modalText">
+              </div>
+          <div class="modal-footer">
+              <button class="btn-primary" onclick="closeDetail()">Cerrar</button>
+          </div>
+      </div>
+  </div>
+
   <script>
     // ===== CONFIGURACIÓN =====
     const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdZ1Qsrzqopm4g4s0NZJK7AKm6plFVoKvpWdymZ-MOIAktQCWsa6Ki4te4UqJUfnfK/exec';
@@ -247,7 +288,12 @@
             count: document.getElementById('kpi-count'),
             last: document.getElementById('kpi-last')
         },
-        noResults: document.getElementById('no-results')
+        noResults: document.getElementById('no-results'),
+        modal: {
+            overlay: document.getElementById('detailModal'),
+            text: document.getElementById('modalText'),
+            id: document.getElementById('modalId')
+        }
     };
 
     // --- FUNCIONES DE FORMATO ---
@@ -306,15 +352,7 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
       const out = {};
       out.id = norm.id||norm['#']||'';
       out.fecha_hora = norm.fecha_hora||norm.fecha||'';
-      // Limpieza de moneda
       let totalClean = (norm.total||'0').toString().replace("$","").replace(/\./g,"").replace(",","."); 
-      // Nota: Ajusta el replace según como venga tu Google Sheet (si usa coma o punto para decimales)
-      // Asumiendo formato latam (1.000,00) -> replace puntos, cambia coma por punto
-      // Si viene formato US (1,000.00) -> replace comas.
-      // Estandarización básica:
-      if(totalClean.indexOf(',') > -1 && totalClean.indexOf('.') > -1){
-           // Caso mixto, asumimos el ultimo es decimal
-      }
       out.total = parseFloat((norm.total||'0').toString().replace("$","").replace(",","")); 
       
       out.detalle_compra = norm.detalle_compra||norm.detalle||'';
@@ -331,7 +369,6 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         const dateFrom = el.inputs.from.value ? new Date(el.inputs.from.value) : null;
         const dateTo = el.inputs.to.value ? new Date(el.inputs.to.value) : null;
         
-        // Ajuste fecha fin al final del día
         if(dateTo) dateTo.setHours(23,59,59);
 
         filteredData = rawData.filter(row => {
@@ -356,7 +393,7 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         el.kpi.total.textContent = formatMoney(total);
         el.kpi.count.textContent = data.length;
         if(data.length > 0){
-            el.kpi.last.textContent = formatDate(data[0]._date); // Como ya ordenamos desc
+            el.kpi.last.textContent = formatDate(data[0]._date); 
         } else {
             el.kpi.last.textContent = "-";
         }
@@ -379,6 +416,13 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
 
         pageData.forEach(row => {
             const tr = document.createElement('tr');
+            
+            // Lógica para detalle largo
+            let detalleContent = `<div class="detalle-texto">${row.detalle_compra}</div>`;
+            if(row.detalle_compra.length > 50){
+                detalleContent += `<button class="btn-xs" onclick="openDetail('${row.id}')">Ver todo</button>`;
+            }
+
             tr.innerHTML = `
                 <td><span style="font-weight:600; color:var(--primary)">#${row.id}</span></td>
                 <td style="font-size:0.9rem">${formatDate(row._date)}</td>
@@ -386,8 +430,8 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
                     <div style="font-weight:600">${row.nombre_cliente}</div>
                     <div style="font-size:0.8rem; color:var(--text-muted)">${row.celular_cliente}</div>
                 </td>
-                <td style="max-width:250px; overflow:hidden; text-overflow:ellipsis" title="${row.detalle_compra}">
-                    ${row.detalle_compra}
+                <td class="col-detalle">
+                    ${detalleContent}
                 </td>
                 <td class="money">${formatMoney(row.total)}</td>
                 <td style="text-align:center">
@@ -413,15 +457,12 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         
         if(totalPages <= 1) return;
 
-        // Botón Anterior
         const prevBtn = document.createElement('div');
         prevBtn.className = 'page-btn';
         prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
         prevBtn.onclick = () => { if(currentPage>1){ currentPage--; renderTable();} };
         el.pager.appendChild(prevBtn);
 
-        // Números (Simplificado)
-        // Mostramos rango cercano a pagina actual
         let startPage = Math.max(1, currentPage - 2);
         let endPage = Math.min(totalPages, currentPage + 2);
 
@@ -433,12 +474,25 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
             el.pager.appendChild(btn);
         }
 
-        // Botón Siguiente
         const nextBtn = document.createElement('div');
         nextBtn.className = 'page-btn';
         nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
         nextBtn.onclick = () => { if(currentPage<totalPages){ currentPage++; renderTable();} };
         el.pager.appendChild(nextBtn);
+    }
+
+    // --- MODAL FUNCTIONS (NUEVO) ---
+    window.openDetail = function(id) {
+        const item = rawData.find(r => r.id == id);
+        if(item) {
+            el.modal.id.textContent = '#' + item.id;
+            el.modal.text.textContent = item.detalle_compra;
+            el.modal.overlay.style.display = 'flex';
+        }
+    }
+
+    window.closeDetail = function() {
+        el.modal.overlay.style.display = 'none';
     }
 
     // --- EVENTOS ---
@@ -450,6 +504,11 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         itemsPerPage = parseInt(e.target.value);
         currentPage = 1;
         renderTable();
+    });
+
+    // Cerrar modal al hacer click afuera
+    el.modal.overlay.addEventListener('click', (e) => {
+        if(e.target === el.modal.overlay) closeDetail();
     });
 
     document.getElementById('refresh').addEventListener('click', fetchSheet);
@@ -464,7 +523,6 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         }
     });
 
-    // CSV Export
     document.getElementById('export').addEventListener('click', () => {
         if(!filteredData.length) return alert('No hay datos para exportar');
         const headers = ["ID","Fecha","Cliente","Celular","Detalle","Total"];

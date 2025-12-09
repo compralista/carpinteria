@@ -139,8 +139,14 @@
     .modal-header { padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
     .modal-title { font-weight: 600; font-size: 1.1rem; }
     .modal-close { cursor: pointer; font-size: 1.2rem; color: var(--text-muted); }
-    .modal-body { padding: 20px; overflow-y: auto; line-height: 1.6; font-size: 0.95rem; white-space: pre-wrap; } /* pre-wrap mantiene saltos de linea */
+    /* Ajuste aqui para el cuerpo del modal */
+    .modal-body { padding: 0; overflow-y: auto; font-size: 0.95rem; } 
     .modal-footer { padding: 15px 20px; border-top: 1px solid var(--border); text-align: right; }
+    
+    /* Estilo para items de la lista modal */
+    .modal-item { padding: 12px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 10px; }
+    .modal-item:last-child { border-bottom: none; }
+    .modal-item i { color: var(--primary); margin-top: 3px; font-size: 0.8rem; }
 
     @media (max-width: 768px) {
         .filters-grid { grid-template-columns: 1fr; }
@@ -251,8 +257,7 @@
               <div class="modal-title">Detalle Completo <span id="modalId" style="color:var(--primary); font-size:0.9em; margin-left:5px"></span></div>
               <div class="modal-close" onclick="closeDetail()"><i class="fas fa-times"></i></div>
           </div>
-          <div class="modal-body" id="modalText">
-              </div>
+          <div class="modal-body" id="modalText"></div>
           <div class="modal-footer">
               <button class="btn-primary" onclick="closeDetail()">Cerrar</button>
           </div>
@@ -326,7 +331,10 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
 
     // --- LÓGICA DE DATOS ---
     async function fetchSheet(){
-      el.loading.style.display = 'flex';
+      // Si el loader ya no está visible (ej: autorefresh), no mostrarlo para no molestar
+      // pero si es la primera carga, sí.
+      if(!rawData.length) el.loading.style.display = 'flex';
+      
       try{
         const res = await fetch(APP_SCRIPT_URL);
         const json = await res.json();
@@ -338,7 +346,7 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         applyFilters();
         updateKPIs(rawData); // KPI iniciales con todo
       }catch(err){
-        alert('Error cargando datos: ' + err.message);
+        console.error(err);
       }finally{
         el.loading.style.display = 'none';
       }
@@ -352,8 +360,9 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
       const out = {};
       out.id = norm.id||norm['#']||'';
       out.fecha_hora = norm.fecha_hora||norm.fecha||'';
-      let totalClean = (norm.total||'0').toString().replace("$","").replace(/\./g,"").replace(",","."); 
-      out.total = parseFloat((norm.total||'0').toString().replace("$","").replace(",","")); 
+      out.total = parseFloat((norm.total||'0').toString().replace("$","").replace(".","").replace(",",".")); 
+      // NOTA: Ajusta el replace anterior si tus numeros vienen como "1.000,00" o "1,000.00"
+      // El ejemplo anterior asume formato europeo/latam "1.000,00" -> quita punto miles, cambia coma a punto.
       
       out.detalle_compra = norm.detalle_compra||norm.detalle||'';
       out.nombre_cliente = norm.nombre_cliente||norm.cliente||'';
@@ -481,12 +490,37 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         el.pager.appendChild(nextBtn);
     }
 
-    // --- MODAL FUNCTIONS (NUEVO) ---
+    // --- MODAL FUNCTIONS (MODIFICADO PARA LISTA) ---
     window.openDetail = function(id) {
         const item = rawData.find(r => r.id == id);
         if(item) {
             el.modal.id.textContent = '#' + item.id;
-            el.modal.text.textContent = item.detalle_compra;
+            
+            // Lógica para convertir texto plano a lista HTML
+            let htmlContent = '';
+            
+            // 1. Separamos por el símbolo pipe |
+            let items = item.detalle_compra.split('|');
+
+            // 2. Si no hay pipes, intentamos separar por el patron "Numero x" (ej: 1x, 2x)
+            if(items.length === 1 && items[0].match(/\d+x\s/)){
+                 // Usamos regex para insertar un marcador de division antes de cada "Nx"
+                 const tempStr = item.detalle_compra.replace(/(\d+x\s)/g, '|SPLIT|$1');
+                 items = tempStr.split('|SPLIT|').filter(t => t.trim() !== '');
+            }
+
+            // 3. Generamos el HTML
+            items.forEach(prod => {
+                let txt = prod.trim();
+                if(txt) {
+                     htmlContent += `<div class="modal-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${txt}</span>
+                     </div>`;
+                }
+            });
+
+            el.modal.text.innerHTML = htmlContent;
             el.modal.overlay.style.display = 'flex';
         }
     }
@@ -552,7 +586,7 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
     // INIT
     fetchSheet();
     // Auto-actualizar cada 60s (aumentado para no saturar)
-    setInterval(fetchSheet, 60000); 
+    setInterval(fetchSheet, 60000);  
 
   </script>
 </body>

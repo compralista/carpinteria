@@ -47,12 +47,35 @@ header {
     z-index: 50;
 }
 
+/* --- ESTILOS NUEVOS PARA EL LOGO --- */
+.marca-container {
+    display: flex;
+    align-items: center;
+    gap: 15px; /* Espacio entre logo y texto */
+}
+
+.logo-negocio {
+    height: 60px; /* Tamaño del logo */
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    transition: transform 0.3s ease;
+    background: white; /* Fondo blanco opcional para resaltar */
+    border-radius: 50%;
+    padding: 2px;
+}
+
+.logo-negocio:hover {
+    transform: scale(1.05) rotate(-3deg);
+}
+
 header h1 { 
     margin: 0; 
     font-size: 2rem; 
     font-family: 'Poppins', sans-serif; 
     font-weight: 700;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    line-height: 1.2;
 }
 
 .header-controles {
@@ -113,7 +136,7 @@ header h1 {
 }
 .btn-carrito:hover { 
     background: #F57C00; 
-    box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+    box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4); 
     transform: translateY(-2px);
 }
 .btn-carrito.deshabilitado {
@@ -426,8 +449,12 @@ header h1 {
     header { padding: 15px; flex-direction: column; gap: 15px;}
     .header-controles { width: 100%; justify-content: center; flex-wrap: wrap; gap: 10px; }
     .btn-header { flex-grow: 1; justify-content: center; padding: 12px; font-size: 0.9rem;}
-    header h1 { font-size: 1.6rem; text-align: center; }
     
+    /* Ajustes logo en movil */
+    .marca-container { flex-direction: column; gap: 10px; margin-bottom: 5px; }
+    header h1 { font-size: 1.6rem; text-align: center; }
+    .logo-negocio { height: 75px; }
+
     .tienda-container { flex-direction: column; margin: 20px auto; padding: 0 15px; gap: 25px;}
     .categorias { width: auto; position: relative; top: 0; padding: 20px;}
     .categorias ul { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -450,7 +477,10 @@ header h1 {
 <body>
 
 <header>
-    <h1>Verdulería "El Fresquito"</h1>
+    <div class="marca-container">
+        <img src="https://i.pinimg.com/736x/fe/0f/98/fe0f984a2a34fd27b93ea39a70b26008.jpg" alt="Logo El Fresquito" class="logo-negocio">
+        <h1>Verdulería "El Fresquito"</h1>
+    </div>
     
     <div class="header-controles">
         <div id="indicador-estado" class="estado-local">

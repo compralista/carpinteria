@@ -268,6 +268,102 @@ header p { font-size: 1.1rem; opacity: 0.9; font-weight: 400; max-width: 600px; 
     header { padding: 40px 20px; border-radius: 0 0 20px 20px; }
     header h1 { font-size: 1.8rem; }
 }
+/* --- FOOTER Y SECCIÓN DE CONTACTO --- */
+footer {
+    background-color: var(--text-dark);
+    color: var(--white);
+    padding: 60px 20px 40px 20px;
+    margin-top: 100px; /* Espacio para que el cuadro respire */
+    text-align: center;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra todo el contenido del footer */
+}
+
+.cta-section {
+    background: var(--white);
+    color: var(--text-dark);
+    padding: 40px 30px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    
+    /* Centrado y Tamaño */
+    width: 90%;           /* Flexible en pantallas medianas */
+    max-width: 600px;     /* No más de 600px en PC */
+    margin: 0 auto;       /* Margen automático a los costados */
+    
+    /* Efecto Elevado */
+    transform: translateY(-110px); 
+    
+    /* Centrado Interno */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.cta-section h3 {
+    color: var(--primary);
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.cta-section p {
+    margin-bottom: 20px;
+    color: var(--text-gray);
+    max-width: 450px; /* Para que el texto no se estire feo */
+}
+
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #25D366;
+    color: white;
+    padding: 16px 32px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.btn-whatsapp:hover {
+    background-color: #128C7E;
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.4);
+}
+
+.copyright-bar {
+    margin-top: -50px; /* Sube un poco para compensar el espacio del cuadro */
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 30px;
+    width: 100%;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+/* --- AJUSTES MÓVILES FINAL --- */
+@media(max-width: 768px){
+    header { padding: 40px 15px; }
+    header h1 { font-size: 2rem; }
+    
+    .cta-section { 
+        width: 95%; 
+        transform: translateY(-90px); /* Menos elevación en móvil */
+        padding: 30px 15px; 
+    }
+    
+    .cta-section h3 { font-size: 1.3rem; }
+    
+    .copyright-bar { 
+        margin-top: -30px; 
+    }
+}
 </style>
 </head>
 <body>
@@ -301,6 +397,26 @@ header p { font-size: 1.1rem; opacity: 0.9; font-weight: 400; max-width: 600px; 
 </div>
 
 <div class="page-buttons" id="paginador"></div>
+<footer>
+    <div class="footer-content">
+        <div class="cta-section">
+            <h3>¿Tenés un comercio o brindás un servicio?</h3>
+            <p>Sumate a la guía más completa de Carpintería y aumentá tus ventas.</p>
+            <a href="https://wa.me/5492664212722?text=Hola!%20Me%20interesa%20sumar%20mi%20negocio%20a%20Compra%20Lista" class="btn-whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i> AGREGAR MI NEGOCIO
+            </a>
+        </div>
+        
+        <div class="copyright-bar">
+            <p>&copy; 2026 Compra Lista - Carpintería, San Luis. Todos los derechos reservados.</p>
+            <p><small>Diseñado para potenciar el comercio local.</small></p>
+        </div>
+    </div>
+</footer>
+
+<a href="https://wa.me/5492664212722?text=Hola!%20Tengo%20una%20consulta%20sobre%20la%20web" class="whatsapp-float" target="_blank" title="Contactanos por WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+</a>
 
 <script>
 // --- TU LÓGICA DE JAVASCRIPT (INTACTA PERO OPTIMIZADA) ---

@@ -23,6 +23,11 @@
     --radio-borde: 16px;
 }
 
+/* --- ESTA ES LA CORRECCIÓN CLAVE --- */
+*, *::before, *::after {
+    box-sizing: border-box; /* Evita que el padding deforme el ancho */
+}
+
 body { 
     font-family: 'Roboto', sans-serif; 
     margin: 0; 
@@ -31,6 +36,7 @@ body {
     background-attachment: fixed;
     color: var(--texto-principal);
     line-height: 1.6;
+    overflow-x: hidden; /* Evita scroll horizontal indeseado */
 }
 
 /* --- Header --- */
@@ -217,7 +223,7 @@ header h1 {
     flex-grow: 1;
 }
 
-/* --- NUEVO: Contenedor de Filtros (Select + Buscador) --- */
+/* --- Contenedor de Filtros (Select + Buscador) --- */
 .controles-filtros {
     display: flex;
     gap: 15px;
@@ -238,11 +244,12 @@ header h1 {
     cursor: pointer;
     outline: none;
     min-width: 180px;
-    appearance: none; /* Quita estilo por defecto */
+    appearance: none; 
     background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%234CAF50%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
     background-repeat: no-repeat;
     background-position: right 15px top 50%;
     background-size: 12px auto;
+    width: auto;
 }
 .select-categoria:focus {
     border-color: var(--verde-fresco);
@@ -370,7 +377,7 @@ header h1 {
 #toast { position: fixed; bottom: 30px; right: 30px; background: rgba(46, 125, 50, 0.95); color: white; padding: 16px 30px; border-radius: 50px; font-weight: 600; opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 1001; transform: translateY(20px); }
 #toast.show { opacity: 1; visibility: visible; transform: translateY(0); }
 
-/* --- RESPONSIVE --- */
+/* --- RESPONSIVE CORREGIDO --- */
 @media (max-width: 768px) {
     /* Ocultamos la sidebar en móvil para usar solo el dropdown */
     .categorias-sidebar { display: none; }
@@ -381,11 +388,29 @@ header h1 {
     
     .tienda-container { flex-direction: column; margin: 20px auto; padding: 0 15px; gap: 15px;}
     
-    /* Reorganizar header de filtros */
-    .header-filtros { padding: 15px; flex-direction: column; align-items: stretch; gap: 15px; }
+    /* Reorganizar header de filtros y evitar desborde */
+    .header-filtros { 
+        padding: 15px; 
+        flex-direction: column; 
+        align-items: stretch; 
+        gap: 15px;
+        width: 100%; /* Asegura ajuste al padre */
+    }
+    
     .titulo-seccion { text-align: center; font-size: 1.4rem; }
-    .controles-filtros { flex-direction: column; }
-    .select-categoria, .buscador-input { width: 100%; }
+    
+    .controles-filtros { 
+        flex-direction: column; 
+        width: 100%;
+        gap: 12px;
+    }
+    
+    /* Importante: width 100% respeta padding gracias al box-sizing de arriba */
+    .select-categoria, .buscador-input { 
+        width: 100% !important; 
+        max-width: 100%;
+    }
+    .buscador-input:focus { width: 100% !important; }
     
     .grid-productos { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
 }
@@ -444,7 +469,7 @@ header h1 {
             <li data-dia="3"><span>Miércoles</span> <span>09:00-13:00 / 17:00-21:00</span></li>
             <li data-dia="4"><span>Jueves</span> <span>09:00-13:00 / 17:00-21:00</span></li>
             <li data-dia="5"><span>Viernes</span> <span>09:00-13:00 / 17:00-21:00</span></li>
-            <li data-dia="6"><span>Sábado</span> <span>09:30-18:00</span></li>
+            <li data-dia="6"><span>Sábado</span> <span>09:30-14:00</span></li>
             <li data-dia="0"><span>Domingo</span> <span style="color:red; font-weight:bold;">Cerrado</span></li>
         </ul>
     </div>
@@ -482,7 +507,7 @@ const WHATSAPP_NUMBER = '542664212722';
 const URL_SHEET_PRODUCTS = `https://script.google.com/macros/s/AKfycbxmrdId2-DIUd1hZSsYAJ4lpalK6XFMeQPHySrHqGljo079iOV0yhJ_iPrz9DA0G--P/exec?negocio=${negocioActual}`;
 const URL_SHEET_REGISTRO = 'https://script.google.com/macros/s/AKfycbyofyN54TXZd4nm5zzJ8gmNDO8aPZ8tdOddKMUQHq6Y4paFkl371zRlNekiOP2YG3S6Ow/exec';
 const STORAGE_KEY = 'carrito_fresquito_v2';
-const HORARIOS = { 1:[[9,0,13,0],[17,0,23,0]], 2:[[9,0,13,0],[16,0,22,30]], 3:[[9,0,13,0],[17,0,21,0]], 4:[[9,0,13,0],[17,0,21,0]], 5:[[9,0,13,0],[17,0,21,0]], 6:[[9,30,18,0]], 0:[] };
+const HORARIOS = { 1:[[9,0,13,0],[17,0,23,0]], 2:[[9,0,13,0],[16,0,22,30]], 3:[[9,0,13,0],[17,0,21,0]], 4:[[9,0,13,0],[17,0,21,0]], 5:[[9,0,13,0],[17,0,21,0]], 6:[[9,30,14,0]], 0:[] };
 
 // DOM
 const productosContainer = document.getElementById('productos-container');
@@ -737,7 +762,7 @@ btnEnviarPedido.addEventListener('click', (e) => {
 
     btnEnviarPedido.textContent = "Procesando...";
     
-    // Registro Sheets (fire and forget)
+    // Registro Sheets
     fetch(URL_SHEET_REGISTRO, { method:'POST', mode:'cors', body: JSON.stringify({negocio_id:negocioActual, nombre_cliente:nom, celular_cliente:cel, detalle_compra:detalle, total:total}) }).catch(console.error);
 
     setTimeout(() => {

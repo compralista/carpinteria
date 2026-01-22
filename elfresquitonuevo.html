@@ -363,6 +363,9 @@ header h1 {
     border-bottom: none;
     font-weight: 600;
 }
+.loading-horarios {
+    text-align: center; color: #888; padding: 20px; font-style: italic;
+}
 
 /* --- Carrito Modal --- */
 .modal-carrito-item { 
@@ -519,15 +522,10 @@ header h1 {
         <h2 style="text-align: center; color: var(--verde-oscuro);">Nuestros Horarios</h2>
         <p style="text-align: center; color: #666; margin-bottom: 20px;">Te esperamos en los siguientes horarios:</p>
         
-        <ul class="lista-horarios">
-            <li data-dia="1"><span>Lunes</span> <span>09:00 - 13:00 y 17:00 - 23:00</span></li>
-            <li data-dia="2"><span>Martes</span> <span>09:00 - 13:00 y 16:00 - 23:00</span></li>
-            <li data-dia="3"><span>Miércoles</span> <span>09:00 - 13:00 y 17:00 - 21:00</span></li>
-            <li data-dia="4"><span>Jueves</span> <span>09:00 - 13:00 y 17:00 - 21:00</span></li>
-            <li data-dia="5"><span>Viernes</span> <span>09:00 - 13:00 y 17:00 - 21:00</span></li>
-            <li data-dia="6"><span>Sábado</span> <span>09:30 - 14:00</span></li>
-            <li data-dia="0"><span>Domingo</span> <span style="color: var(--rojo-cerrado); font-weight:bold;">Cerrado</span></li>
+        <ul class="lista-horarios" id="lista-horarios-dinamica">
+             <li class="loading-horarios">Cargando horarios desde la sucursal...</li>
         </ul>
+
         <button onclick="document.getElementById('modal-horarios').classList.remove('visible')" class="btn-header btn-carrito" style="margin: 20px auto 0; display:block;">Entendido</button>
     </div>
 </div>
@@ -561,7 +559,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- CONFIGURACIÓN DE URLS ---
 const params = new URLSearchParams(window.location.search);
-// ID del negocio que coincide con el nombre de la hoja en Google Sheets
 const negocioActual = params.get('negocio') || 'verduleria_elfresquito1';
 
 // URL del Apps Script de Productos (GET)
@@ -570,19 +567,14 @@ const URL_SHEET_PRODUCTS = `https://script.google.com/macros/s/AKfycbxmrdId2-DIU
 // URL del Apps Script de Registro (POST)
 const URL_SHEET_REGISTRO = 'https://script.google.com/macros/s/AKfycbyofyN54TXZd4nm5zzJ8gmNDO8aPZ8tdOddKMUQHq6Y4paFkl371zRlNekiOP2YG3S6Ow/exec';
 
-// Número de WhatsApp (Configurable por negocio si se desea)
+// NUEVA URL: Apps Script de Horarios
+const URL_SHEET_HORARIOS = 'https://script.google.com/macros/s/AKfycbxvNRdU68PnP3jInuC0yhMntW5BJm3_NtcHsMacCck2xRt1G2hcateos4ZQP_Yf3-Rr/exec';
+
 const WHATSAPP_NUMBER = '542664212722';
 
-// --- CONFIGURACIÓN DE APERTURA ---
-const HORARIOS = {
-    1: [[9, 0, 13, 0], [17, 0, 23, 0]], 
-    2: [[9, 0, 13, 0], [16, 0, 22, 30]], 
-    3: [[9, 0, 13, 0], [17, 0, 21, 0]], 
-    4: [[9, 0, 13, 0], [17, 0, 21, 0]], 
-    5: [[9, 0, 13, 0], [17, 0, 21, 0]], 
-    6: [[9, 30, 14, 0]], 
-    0: [] 
-};
+// --- CONFIGURACIÓN DE APERTURA (Variable modificable) ---
+// Se inicializa vacío y se llena con el fetch
+let horariosActivos = {};
 
 // --- Variables y Selectores ---
 const productosContainer = document.getElementById('productos-container');
@@ -591,6 +583,7 @@ const loading = document.getElementById('loading');
 const errorMsg = document.getElementById('error-msg');
 const modal = document.getElementById('modal-carrito');
 const modalHorarios = document.getElementById('modal-horarios');
+const listaHorariosUL = document.getElementById('lista-horarios-dinamica');
 const modalCarritoItemsContainer = document.getElementById('modal-carrito-items');
 const totalHeader = document.getElementById('total-header');
 const modalTotal = document.getElementById('modal-total');
@@ -599,6 +592,17 @@ const formCliente = document.getElementById('form-cliente');
 const toast = document.getElementById('toast');
 const btnVerCarrito = document.getElementById('btn-ver-carrito');
 const indicadorEstado = document.getElementById('indicador-estado');
+
+// Control de modales (Botones)
+const btnAbrirHorarios = document.getElementById('btn-abrir-horarios');
+const btnCerrarHorarios = document.getElementById('btn-cerrar-horarios');
+const btnCerrarCarrito = document.getElementById('btn-cerrar-modal');
+
+// Eventos de apertura/cierre de modales
+btnAbrirHorarios.addEventListener('click', () => modalHorarios.classList.add('visible'));
+btnCerrarHorarios.addEventListener('click', () => modalHorarios.classList.remove('visible'));
+btnVerCarrito.addEventListener('click', () => modal.classList.add('visible'));
+btnCerrarCarrito.addEventListener('click', () => modal.classList.remove('visible'));
 
 let productos = [];
 let carrito = [];
@@ -619,30 +623,131 @@ function showToast(message) {
 const formatPrice = (price) => `$${Number(price).toFixed(2)}`;
 
 // --- Lógica de Estado y Horarios ---
+
+// Función auxiliar para parsear hora "HH:MM" a array [H, M]
+function parsearHora(textoHora) {
+    if(!textoHora) return [0,0];
+    const partes = textoHora.toString().split(':');
+    return [parseInt(partes[0]), parseInt(partes[1] || 0)];
+}
+
+// Mapa de días texto -> número JS
+const mapDias = {
+    'lunes': 1, 'martes': 2, 'miercoles': 3, 'miércoles': 3, 
+    'jueves': 4, 'viernes': 5, 'sabado': 6, 'sábado': 6, 'domingo': 0
+};
+
+// Función para cargar horarios desde Google Sheets
+async function cargarHorariosRemotos() {
+    try {
+        const response = await fetch(URL_SHEET_HORARIOS);
+        const data = await response.json();
+        
+        // Limpiar lista visual
+        listaHorariosUL.innerHTML = '';
+        horariosActivos = {}; // Reiniciar objeto lógico
+
+        // Se asume que el sheet devuelve un array de objetos o un objeto {horarios: [...]}
+        let listaDatos = Array.isArray(data) ? data : (data.horarios || []);
+
+        listaDatos.forEach(item => {
+            // 1. Obtener nombre del día y limpiarlo
+            const diaRaw = item.dia || "";
+            const diaIndex = mapDias[diaRaw.toLowerCase().trim()];
+            
+            let textoVisual = "";
+            let rangosLogicos = []; // Aquí guardamos [9,0,13,0]
+            let partesTexto = [];
+
+            // 2. Revisar si está cerrado manualmente
+            if (item.cerrado === true || String(item.cerrado).toUpperCase() === "SI" || String(item.cerrado).toUpperCase() === "TRUE") {
+                textoVisual = `<span style="color:var(--rojo-cerrado); font-weight:bold;">Cerrado</span>`;
+                
+                // --- CORRECCIÓN AQUÍ PARA EL MOTIVO ---
+                const motivo = item.motivo ? String(item.motivo).trim() : "";
+                if(motivo.length > 0) {
+                     // Lo ponemos en un div con margen superior para que baje de renglón
+                     textoVisual += `<div style="font-size: 0.85rem; color: #E53935; font-style: italic; margin-top:4px;">(${motivo})</div>`;
+                }
+                // -------------------------------------
+
+            } else {
+                // 3. Procesar turno mañana (m_inicio - m_fin)
+                if (item.m_inicio && item.m_fin && item.m_inicio.toString() !== "") {
+                    partesTexto.push(`${item.m_inicio} - ${item.m_fin}`);
+                    rangosLogicos.push([...parsearHora(item.m_inicio), ...parsearHora(item.m_fin)]);
+                }
+                
+                // 4. Procesar turno tarde (t_inicio - t_fin)
+                if (item.t_inicio && item.t_fin && item.t_inicio.toString() !== "") {
+                    partesTexto.push(`${item.t_inicio} - ${item.t_fin}`);
+                    rangosLogicos.push([...parsearHora(item.t_inicio), ...parsearHora(item.t_fin)]);
+                }
+
+                // Unir los textos
+                if (partesTexto.length > 0) {
+                    textoVisual = partesTexto.join(' y ');
+                } else {
+                    textoVisual = "Cerrado";
+                }
+            }
+
+            // 5. Renderizar en HTML
+            const li = document.createElement('li');
+            li.setAttribute('data-dia', diaIndex);
+            
+            // Marcar el día de hoy
+            const hoyIndex = new Date().getDay();
+            if(diaIndex === hoyIndex) li.classList.add('dia-actual');
+
+            li.innerHTML = `<span>${diaRaw}</span> <span>${textoVisual}</span>`;
+            listaHorariosUL.appendChild(li);
+
+            // 6. Guardar en memoria para el semáforo
+            // Solo guardamos si NO está cerrado y tenemos rangos
+            const cerradoBooleano = (item.cerrado === true || String(item.cerrado).toUpperCase() === "SI" || String(item.cerrado).toUpperCase() === "TRUE");
+
+            if (diaIndex !== undefined && !cerradoBooleano && rangosLogicos.length > 0) {
+                horariosActivos[diaIndex] = rangosLogicos;
+            }
+        });
+
+        // Una vez cargados, verificamos si está abierto ahora
+        verificarEstadoNegocio();
+
+    } catch (error) {
+        console.error("Error cargando horarios:", error);
+        listaHorariosUL.innerHTML = '<li style="color:red">Error cargando horarios.</li>';
+        horariosActivos = {};
+        verificarEstadoNegocio();
+    }
+}
+
 function verificarEstadoNegocio() {
     const ahora = new Date();
     const diaSemana = ahora.getDay(); 
     const horaActual = ahora.getHours();
     const minActual = ahora.getMinutes();
-    const tiempoActual = horaActual * 60 + minActual;
+    const tiempoActual = horaActual * 60 + minActual; // Minutos totales desde las 00:00
 
-    document.querySelectorAll('.lista-horarios li').forEach(li => li.classList.remove('dia-actual'));
-    const liHoy = document.querySelector(`.lista-horarios li[data-dia="${diaSemana}"]`);
-    if(liHoy) liHoy.classList.add('dia-actual');
-
-    const rangosHoy = HORARIOS[diaSemana];
+    // Usamos los horarios cargados dinámicamente
+    const rangosHoy = horariosActivos[diaSemana];
     let estaAbierto = false;
 
     if (rangosHoy && rangosHoy.length > 0) {
+        // rangosHoy es un array de arrays: [[9,0,13,0], [17,0,21,0]]
         for (let rango of rangosHoy) {
+            // rango formato: [horaInicio, minInicio, horaFin, minFin]
             const inicio = rango[0] * 60 + rango[1];
             const fin = rango[2] * 60 + rango[3];
+            
             if (tiempoActual >= inicio && tiempoActual < fin) {
                 estaAbierto = true;
                 break;
             }
         }
     }
+    
     negocioAbierto = estaAbierto;
     actualizarInterfazSegunEstado();
 }
@@ -660,9 +765,11 @@ function actualizarInterfazSegunEstado() {
         btnVerCarrito.disabled = true;
         btnVerCarrito.classList.add('deshabilitado');
         btnVerCarrito.title = "Cerrado - No se pueden realizar pedidos.";
+        
+        // Opcional: Cerrar carrito si está abierto
         if (modal.classList.contains('visible')) {
-            modal.classList.remove('visible');
-            showToast("El negocio ha cerrado.");
+             // modal.classList.remove('visible'); // Descomentar si quieres que cierre el modal
+             showToast("El negocio ha cerrado.");
         }
     }
     actualizarBotonesProductos();
@@ -720,7 +827,8 @@ async function cargarProductosRemotos() {
         loading.style.display = 'none';
         generarCategorias();
         filtrarPorCategoria('todos');
-        verificarEstadoNegocio();
+        // Actualizamos estado (se intentará de nuevo tras cargar horarios)
+        actualizarBotonesProductos(); 
     }
 }
 
@@ -836,101 +944,43 @@ function actualizarCarritoUI() {
             const item = carrito.find(p => p.id == btn.dataset.id);
             if(btn.dataset.accion==='+') {
                 if(item.cantidad<item.stock) item.cantidad++;
-                else { showToast(`Tope de stock`); return; }
             } else {
                 item.cantidad--;
-                if(item.cantidad<=0) carrito = carrito.filter(p=>p.id!==item.id);
+                if(item.cantidad===0) carrito = carrito.filter(p=>p.id!==item.id);
             }
             actualizarCarritoUI();
         });
     });
 }
 
-// --- Listeners de Eventos UI ---
-document.getElementById('btn-ver-carrito').addEventListener('click', () => {
-    if (!negocioAbierto) {
-        showToast("El negocio está cerrado.");
-        return;
-    }
-    modal.classList.add('visible');
-});
-document.getElementById('btn-cerrar-modal').addEventListener('click',()=>modal.classList.remove('visible'));
-
-document.getElementById('btn-abrir-horarios').addEventListener('click', () => {
-    modalHorarios.classList.add('visible');
-});
-document.getElementById('btn-cerrar-horarios').addEventListener('click', () => {
-    modalHorarios.classList.remove('visible');
-});
-
-// --- Enviar Pedido ---
-btnEnviarPedido.addEventListener('click', async () => {
-    verificarEstadoNegocio();
-    if (!negocioAbierto) return showToast("El negocio cerró.");
-
-    const nombre = formCliente.nombre.value.trim();
-    const celular = formCliente.celular.value.trim();
-
-    if (!nombre || !celular) return showToast('Completa los datos de contacto');
-    if (!carrito.length) return showToast('El carrito está vacío');
-
-    const totalCalculado = carrito.reduce((a, b) => a + b.precio * b.cantidad, 0);
-
-    btnEnviarPedido.disabled = true;
-    btnEnviarPedido.textContent = 'Enviando...';
-    
-    let detalle_compra_sheet = carrito.map(item => 
-        `${item.cantidad}x ${item.nombre} [${formatPrice(item.precio * item.cantidad)}]`
-    ).join(' | ');
-
-    const datosParaRegistro = {
-        negocio_id: negocioActual, // Importante para el registro
-        nombre_cliente: nombre,
-        celular_cliente: celular,
-        detalle_compra: detalle_compra_sheet,
-        total: totalCalculado
-    };
-
-    try {
-        const fetchResp = await fetch(URL_SHEET_REGISTRO, {
-            method: 'POST', mode: 'cors',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-            body: JSON.stringify(datosParaRegistro)
-        });
-        const dataRegistro = await fetchResp.json();
-        if (dataRegistro.ok) showToast('✅ Pedido registrado.');
-        else showToast('⚠️ Error en registro (Server)');
-    } catch (error) {
-        console.error(error);
-        showToast('❌ Error de conexión al registrar.');
-    } finally {
-        // Generar Link WhatsApp
-        let mensaje = `*Nuevo Pedido - ${document.querySelector('header h1').innerText}*%0A%0A`;
-        mensaje += `👤 *Cliente:* ${nombre}%0A📱 *Cel:* ${celular}%0A%0A`;
-        mensaje += `🛒 *Detalle:*%0A`;
-        carrito.forEach(item => { 
-            mensaje += `- ${item.cantidad}x ${item.nombre} (${formatPrice(item.precio * item.cantidad)})%0A`; 
-        });
-        mensaje += `%0A💰 *TOTAL: ${formatPrice(totalCalculado)}*`;
-
-        const urlWhats = `https://wa.me/${WHATSAPP_NUMBER}?text=${mensaje}`;
-        window.open(urlWhats, '_blank');
-        
-        btnEnviarPedido.disabled = false;
-        btnEnviarPedido.textContent = '✅ Enviar Pedido por WhatsApp';
-        modal.classList.remove('visible');
-        
-        // Opcional: Limpiar carrito tras éxito
-        // carrito = []; actualizarCarritoUI();
-    }
-});
-
-// Inicio
+// Inicializar
 cargarProductosRemotos();
+cargarHorariosRemotos();
+// Recargar estado cada minuto
 setInterval(verificarEstadoNegocio, 60000);
+
+// Enviar pedido WhatsApp
+btnEnviarPedido.addEventListener('click', (e) => {
+    e.preventDefault();
+    if(carrito.length === 0) { showToast("El carrito está vacío"); return; }
+    
+    const nombre = document.getElementById('nombre').value;
+    const celular = document.getElementById('celular').value; // No usado en enlace pero útil para registro
+    if(!nombre || !celular) { showToast("Completa tus datos"); return; }
+
+    let mensaje = `Hola! Soy *${nombre}*. Quiero pedir:\n\n`;
+    let total = 0;
+    carrito.forEach(p => {
+        mensaje += `▪ ${p.cantidad} x ${p.nombre} ($${p.precio*p.cantidad})\n`;
+        total += p.precio * p.cantidad;
+    });
+    mensaje += `\n*TOTAL: $${total}*`;
+    
+    const link = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(mensaje)}`;
+    window.open(link, '_blank');
+});
 
 });
 </script>
-
 </body>
 </html>

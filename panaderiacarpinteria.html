@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verdulería "El Fresquito" - Pedidos Online</title>
+<title>Panaderia "Carpinteria" - Pedidos Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
 /* --- 🎨 Variables y Estilos Generales --- */
@@ -481,8 +481,8 @@ header h1 {
 
 <header>
     <div class="marca-container">
-        <img src="https://i.pinimg.com/736x/fe/0f/98/fe0f984a2a34fd27b93ea39a70b26008.jpg" alt="Logo El Fresquito" class="logo-negocio">
-        <h1>Verdulería "El Fresquito"</h1>
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSgZSxZZooA37zlJ9rWJEx2tom_p2pQGC07VQ&s" alt="Logo Panaderia Caprinteria" class="logo-negocio">
+        <h1>Panaderia "Carpinteria"</h1>
     </div>
     
     <div class="header-controles">
@@ -559,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- CONFIGURACIÓN DE URLS ---
 const params = new URLSearchParams(window.location.search);
-const negocioActual = params.get('negocio') || 'verduleria_elfresquito1';
+const negocioActual = params.get('negocio') || 'panaderia_carpinteria';
 
 // URL del Apps Script de Productos (GET)
 const URL_SHEET_PRODUCTS = `https://script.google.com/macros/s/AKfycbxmrdId2-DIUd1hZSsYAJ4lpalK6XFMeQPHySrHqGljo079iOV0yhJ_iPrz9DA0G--P/exec?negocio=${negocioActual}`;
@@ -568,7 +568,7 @@ const URL_SHEET_PRODUCTS = `https://script.google.com/macros/s/AKfycbxmrdId2-DIU
 const URL_SHEET_REGISTRO = 'https://script.google.com/macros/s/AKfycbyofyN54TXZd4nm5zzJ8gmNDO8aPZ8tdOddKMUQHq6Y4paFkl371zRlNekiOP2YG3S6Ow/exec';
 
 // NUEVA URL: Apps Script de Horarios
-const URL_SHEET_HORARIOS = 'https://script.google.com/macros/s/AKfycbxvNRdU68PnP3jInuC0yhMntW5BJm3_NtcHsMacCck2xRt1G2hcateos4ZQP_Yf3-Rr/exec';
+const URL_SHEET_HORARIOS = 'https://script.google.com/macros/s/AKfycbyoY2hTDiFKct1pbntML4E3s80A48tUhvAgbE-oK9keldRdHg0NvDMyHL3iOLN7JeKJ/exec';
 
 const WHATSAPP_NUMBER = '542664212722';
 

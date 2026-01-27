@@ -12,7 +12,7 @@
 :root {
     --primary: #2E7D32; /* Verde bosque profesional */
     --primary-light: #e8f5e9;
-    --accent: #FF6D00; /* Naranja vibrante para llamadas a la acción */
+    --accent: #FF6D00; /* Naranja vibrante */
     --bg-body: #F4F6F8;
     --text-dark: #1E293B;
     --text-gray: #64748B;
@@ -83,6 +83,7 @@ header p { font-size: 1.1rem; opacity: 0.9; font-weight: 400; max-width: 600px; 
     transition: var(--transition);
     outline: none;
     font-family: 'Inter', sans-serif;
+    box-sizing: border-box; /* Corrección para inputs */
 }
 .filter-group input:focus, .filter-group select:focus {
     border-color: var(--primary);
@@ -168,6 +169,35 @@ header p { font-size: 1.1rem; opacity: 0.9; font-weight: 400; max-width: 600px; 
     line-height: 1.5;
 }
 
+/* NUEVO: ESTILOS PARA CAJA DE DELIVERY */
+.delivery-info-box {
+    background-color: #fff7ed; /* Fondo naranja suave */
+    border: 1px dashed #ffcc80;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 5px;
+    font-size: 0.85rem;
+    color: var(--text-dark);
+}
+
+.delivery-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+.delivery-row:last-child { margin-bottom: 0; }
+.delivery-row i { color: var(--accent); width: 16px; text-align: center; }
+
+.costo-gratis {
+    color: var(--primary); /* Verde */
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.5px;
+}
+.costo-precio { font-weight: 700; color: var(--text-dark); }
+
 /* Estados y Badges */
 .estado-container {
     display: flex;
@@ -194,7 +224,7 @@ header p { font-size: 1.1rem; opacity: 0.9; font-weight: 400; max-width: 600px; 
 .estado.cerrado { background-color: #fef2f2; color: #dc2626; }
 .estado.cerrado::before { background-color: #dc2626; }
 
-/* Icono Delivery mejorado */
+/* Icono Delivery flotante */
 .delivery-badge {
     position: absolute;
     top: 20px;
@@ -221,7 +251,7 @@ header p { font-size: 1.1rem; opacity: 0.9; font-weight: 400; max-width: 600px; 
     background: linear-gradient(90deg, #fff3e0 0%, #ffe0b2 100%);
     color: #e65100;
     padding: 8px 12px;
-    margin-top: 12px;
+    margin-top: 8px;
     border-radius: 8px;
     font-weight: 600;
     font-size: 0.8rem;
@@ -273,7 +303,7 @@ footer {
     background-color: var(--text-dark);
     color: var(--white);
     padding: 60px 20px 40px 20px;
-    margin-top: 100px; /* Espacio para que el cuadro respire */
+    margin-top: 100px;
     text-align: center;
 }
 
@@ -282,7 +312,7 @@ footer {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centra todo el contenido del footer */
+    align-items: center;
 }
 
 .cta-section {
@@ -291,33 +321,18 @@ footer {
     padding: 40px 30px;
     border-radius: var(--radius);
     box-shadow: var(--shadow-hover);
-    
-    /* Centrado y Tamaño */
-    width: 90%;           /* Flexible en pantallas medianas */
-    max-width: 600px;     /* No más de 600px en PC */
-    margin: 0 auto;       /* Margen automático a los costados */
-    
-    /* Efecto Elevado */
+    width: 90%;           
+    max-width: 600px;     
+    margin: 0 auto;       
     transform: translateY(-110px); 
-    
-    /* Centrado Interno */
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
-.cta-section h3 {
-    color: var(--primary);
-    margin-bottom: 10px;
-    font-size: 1.5rem;
-}
-
-.cta-section p {
-    margin-bottom: 20px;
-    color: var(--text-gray);
-    max-width: 450px; /* Para que el texto no se estire feo */
-}
+.cta-section h3 { color: var(--primary); margin-bottom: 10px; font-size: 1.5rem; }
+.cta-section p { margin-bottom: 20px; color: var(--text-gray); max-width: 450px; }
 
 .btn-whatsapp {
     display: inline-flex;
@@ -339,7 +354,7 @@ footer {
 }
 
 .copyright-bar {
-    margin-top: -50px; /* Sube un poco para compensar el espacio del cuadro */
+    margin-top: -50px;
     border-top: 1px solid rgba(255,255,255,0.1);
     padding-top: 30px;
     width: 100%;
@@ -351,18 +366,9 @@ footer {
 @media(max-width: 768px){
     header { padding: 40px 15px; }
     header h1 { font-size: 2rem; }
-    
-    .cta-section { 
-        width: 95%; 
-        transform: translateY(-90px); /* Menos elevación en móvil */
-        padding: 30px 15px; 
-    }
-    
+    .cta-section { width: 95%; transform: translateY(-90px); padding: 30px 15px; }
     .cta-section h3 { font-size: 1.3rem; }
-    
-    .copyright-bar { 
-        margin-top: -30px; 
-    }
+    .copyright-bar { margin-top: -30px; }
 }
 </style>
 </head>
@@ -415,7 +421,7 @@ footer {
 </footer>
 
 <script>
-// --- TU LÓGICA DE JAVASCRIPT (INTACTA PERO OPTIMIZADA) ---
+// --- TU LÓGICA DE JAVASCRIPT ---
 let allCards = [];
 let currentPage = 1;
 const cardsPerPage = 15;
@@ -455,13 +461,10 @@ function actualizarEstados(){
         estadoSpan.classList.add(res.estado);
         
         // Formateo de horarios más limpio
-        let horariosTexto = "";
         const diasSemana = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
-        const diaActual = new Date().getDay(); // 0 es Domingo
-        // Ajuste para mapear domingo (0) al final si queremos orden Lunes-Dom, o simplemente resaltar el dia
+        const diaActual = new Date().getDay(); 
         const diaIndex = diaActual === 0 ? 6 : diaActual - 1; 
 
-        // Solo mostramos el horario de hoy para no saturar, o un resumen
         const nombreDiaHoy = diasSemana[diaIndex];
         const horarioHoy = card.getAttribute('data-'+nombreDiaHoy.toLowerCase());
         
@@ -478,10 +481,9 @@ function mostrarPagina(cards, page=1){
     const end = start+cardsPerPage;
     const pageCards = cards.slice(start, end);
     
-    // Animación simple de entrada
     pageCards.forEach((c, index) => {
         c.style.animation = `fadeIn 0.4s ease forwards ${index * 0.05}s`;
-        c.style.opacity = '0'; // Inicialmente oculto para la animación
+        c.style.opacity = '0';
         container.appendChild(c);
     });
 
@@ -499,7 +501,7 @@ function mostrarPagina(cards, page=1){
     }
 }
 
-// Agregar keyframes para la animación dinámicamente
+// Agregar keyframes para la animación
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `@keyframes fadeIn { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(10px); } }`;
 document.head.appendChild(styleSheet);
@@ -515,17 +517,18 @@ function aplicarFiltros(){
     const abiertos = filtrados.filter(c=>c.querySelector('.estado').classList.contains('abierto'));
     const cerrados = filtrados.filter(c=>!c.querySelector('.estado').classList.contains('abierto'));
 
-    // Shuffle simple
+    // Shuffle simple para aleatoriedad
     const shuffle = (array) => array.sort(() => Math.random() - 0.5);
 
     filtrados = [...shuffle(abiertos), ...shuffle(cerrados)];
-    mostrarPagina(filtrados, 1); // Reset a pagina 1 al filtrar
+    mostrarPagina(filtrados, 1);
 }
 
 function cargarLogo(img){
     img.onerror = ()=> img.src = 'https://ui-avatars.com/api/?background=random&color=fff&size=128&name=Negocio';
 }
 
+// URL DEL SCRIPT DE GOOGLE
 const scriptURL = "https://script.google.com/macros/s/AKfycbx-VnsVDdD8_QDBJxGBpwPs_3RZDqtSnoGAvZM2RG_xkcCuVwixTuWMlo3tLHZu4nyf/exec";
 
 async function cargarNegocios() {
@@ -547,7 +550,30 @@ async function cargarNegocios() {
             });
 
             const formasPago = n["Formas de pago"] || n["Formas de Pago"] || 'Consultar';
-            const tieneDelivery = n.Delivery === true || n.Delivery === "TRUE" || n.Delivery === "Si";
+            const tieneDelivery = n.Delivery === true;
+
+            // --- LÓGICA DE DELIVERY MEJORADA ---
+            let rawCosto = n["Costo Delivery"]; 
+            let horarioDelivery = n["Horario Delivery"] || "";
+            let htmlCosto = "";
+
+            if (rawCosto !== undefined && rawCosto !== "") {
+                if (rawCosto == 0 || String(rawCosto).toLowerCase().includes("gratis")) {
+                    htmlCosto = `<span class="costo-gratis">¡GRATIS!</span>`;
+                } else {
+                    const esNumero = !isNaN(rawCosto);
+                    htmlCosto = `<span class="costo-precio">${esNumero ? '$' + rawCosto : rawCosto}</span>`;
+                }
+            }
+
+            let bloqueDelivery = "";
+            if (tieneDelivery && (htmlCosto || horarioDelivery)) {
+                bloqueDelivery = `
+                <div class="delivery-info-box">
+                    ${htmlCosto ? `<div class="delivery-row"><i class="fas fa-motorcycle"></i> <span>Envío: ${htmlCosto}</span></div>` : ''}
+                    ${horarioDelivery ? `<div class="delivery-row"><i class="far fa-clock"></i> <span>${horarioDelivery}</span></div>` : ''}
+                </div>`;
+            }
 
             card.innerHTML = `
                 <div class="card-header">
@@ -570,7 +596,7 @@ async function cargarNegocios() {
                         <span>${formasPago}</span>
                     </div>
 
-                    ${n.Banner && n.Banner.trim() !== "" 
+                    ${bloqueDelivery} ${n.Banner && n.Banner.trim() !== "" 
                         ? `<div class="banner-simple"><i class="fas fa-bullhorn"></i> ${n.Banner}</div>` 
                         : ""
                     }
@@ -609,7 +635,7 @@ async function cargarNegocios() {
 
     } catch (error) {
         console.error("Error cargando negocios", error);
-        document.getElementById('spinner').innerHTML = '<p style="color:red">Error al cargar los datos. Intenta recargar.</p>';
+        document.getElementById('spinner').innerHTML = '<p style="color:red; text-align:center;">Error al cargar datos.<br>Intenta recargar la página.</p>';
     }
 }
 

@@ -195,6 +195,34 @@
         </div>
     </div>
 
+    <h2 style="font-size:1rem; color:var(--text-muted); margin: 20px 0 10px 0; font-weight:600;">Estadísticas del Periodo</h2>
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#DCFCE7; color:#166534"><i class="fas fa-crown"></i></div>
+            <div class="kpi-info">
+                <h3>Cliente Top</h3>
+                <p id="stat-client" style="font-size:1.1rem">-</p>
+                <span id="stat-client-count" style="font-size:0.8rem; color:var(--text-muted)">0 compras</span>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#FEF3C7; color:#B45309"><i class="fas fa-box-open"></i></div>
+            <div class="kpi-info">
+                <h3>Más Vendido</h3>
+                <p id="stat-product" style="font-size:1.1rem">-</p>
+                <span id="stat-product-count" style="font-size:0.8rem; color:var(--text-muted)">0 unidades</span>
+            </div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:#FEE2E2; color:#991B1B"><i class="fas fa-fire"></i></div>
+            <div class="kpi-info">
+                <h3>Hora Pico</h3>
+                <p id="stat-hour" style="font-size:1.1rem">-</p>
+                <span style="font-size:0.8rem; color:var(--text-muted)">Mayor tráfico</span>
+            </div>
+        </div>
+    </div>
+
     <div class="controls-panel">
       <div class="filters-grid">
         <div>
@@ -331,8 +359,6 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
 
     // --- LÓGICA DE DATOS ---
     async function fetchSheet(){
-      // Si el loader ya no está visible (ej: autorefresh), no mostrarlo para no molestar
-      // pero si es la primera carga, sí.
       if(!rawData.length) el.loading.style.display = 'flex';
       
       try{
@@ -344,7 +370,6 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         rawData = rows.sort((a,b) => b._date - a._date);
         
         applyFilters();
-        updateKPIs(rawData); // KPI iniciales con todo
       }catch(err){
         console.error(err);
       }finally{
@@ -362,7 +387,6 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
       out.fecha_hora = norm.fecha_hora||norm.fecha||'';
       out.total = parseFloat((norm.total||'0').toString().replace("$","").replace(".","").replace(",",".")); 
       // NOTA: Ajusta el replace anterior si tus numeros vienen como "1.000,00" o "1,000.00"
-      // El ejemplo anterior asume formato europeo/latam "1.000,00" -> quita punto miles, cambia coma a punto.
       
       out.detalle_compra = norm.detalle_compra||norm.detalle||'';
       out.nombre_cliente = norm.nombre_cliente||norm.cliente||'';
@@ -398,6 +422,7 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
     }
 
     function updateKPIs(data){
+        // 1. KPI Financieros
         const total = data.reduce((sum, row) => sum + (isNaN(row.total) ? 0 : row.total), 0);
         el.kpi.total.textContent = formatMoney(total);
         el.kpi.count.textContent = data.length;
@@ -406,6 +431,81 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         } else {
             el.kpi.last.textContent = "-";
         }
+        
+        // 2. Calcular nuevas estadísticas
+        calculateStats(data);
+    }
+
+    // --- NUEVA LÓGICA DE ESTADÍSTICAS ---
+    function calculateStats(data) {
+        if (data.length === 0) {
+            document.getElementById('stat-client').textContent = "-";
+            document.getElementById('stat-product').textContent = "-";
+            document.getElementById('stat-hour').textContent = "-";
+            document.getElementById('stat-client-count').textContent = "0 compras";
+            document.getElementById('stat-product-count').textContent = "0 unidades";
+            return;
+        }
+
+        // A. CLIENTE MÁS FIEL
+        const clientes = {};
+        data.forEach(r => {
+            const nombre = r.nombre_cliente ? r.nombre_cliente.trim() : "Anónimo";
+            clientes[nombre] = (clientes[nombre] || 0) + 1;
+        });
+        const topCliente = Object.keys(clientes).reduce((a, b) => clientes[a] > clientes[b] ? a : b, "-");
+        document.getElementById('stat-client').textContent = topCliente;
+        document.getElementById('stat-client-count').textContent = (clientes[topCliente] || 0) + " compras";
+
+        // B. HORA PICO
+        const horas = {};
+        data.forEach(r => {
+            if(!r._date || isNaN(r._date)) return;
+            const h = r._date.getHours();
+            horas[h] = (horas[h] || 0) + 1;
+        });
+        const topHora = Object.keys(horas).length > 0 
+            ? Object.keys(horas).reduce((a, b) => horas[a] > horas[b] ? a : b) 
+            : "-";
+        
+        document.getElementById('stat-hour').textContent = (topHora !== "-") ? `${topHora}:00 hs` : "-";
+
+        // C. PRODUCTO MÁS VENDIDO
+        const productos = {};
+        data.forEach(r => {
+            let detalle = r.detalle_compra.toLowerCase();
+            // Intento de separación inteligente
+            let items = detalle.split('|');
+            if(items.length === 1 && items[0].match(/\d+x\s/)){
+                 const tempStr = detalle.replace(/(\d+x\s)/g, '|SPLIT|$1');
+                 items = tempStr.split('|SPLIT|').filter(t => t.trim() !== '');
+            }
+
+            items.forEach(itemStr => {
+                let cleanName = itemStr.trim();
+                let cantidad = 1;
+                // Detectar "2x Pizza"
+                const matchQty = cleanName.match(/^(\d+)\s*x\s+(.+)/);
+                if(matchQty) {
+                    cantidad = parseInt(matchQty[1]);
+                    cleanName = matchQty[2].trim();
+                }
+                if(cleanName) {
+                    productos[cleanName] = (productos[cleanName] || 0) + cantidad;
+                }
+            });
+        });
+
+        const topProd = Object.keys(productos).length > 0 
+            ? Object.keys(productos).reduce((a, b) => productos[a] > productos[b] ? a : b) 
+            : "-";
+            
+        document.getElementById('stat-product').textContent = topProd !== "-" 
+            ? topProd.charAt(0).toUpperCase() + topProd.slice(1) 
+            : "-";
+        document.getElementById('stat-product-count').textContent = topProd !== "-" 
+            ? (productos[topProd] || 0) + " unidades" 
+            : "0 unidades";
     }
 
     // --- RENDERIZADO ---
@@ -499,24 +599,20 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
             // Lógica para convertir texto plano a lista HTML
             let htmlContent = '';
             
-            // 1. Separamos por el símbolo pipe |
             let items = item.detalle_compra.split('|');
 
-            // 2. Si no hay pipes, intentamos separar por el patron "Numero x" (ej: 1x, 2x)
             if(items.length === 1 && items[0].match(/\d+x\s/)){
-                 // Usamos regex para insertar un marcador de division antes de cada "Nx"
                  const tempStr = item.detalle_compra.replace(/(\d+x\s)/g, '|SPLIT|$1');
                  items = tempStr.split('|SPLIT|').filter(t => t.trim() !== '');
             }
 
-            // 3. Generamos el HTML
             items.forEach(prod => {
                 let txt = prod.trim();
                 if(txt) {
-                     htmlContent += `<div class="modal-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span>${txt}</span>
-                     </div>`;
+                      htmlContent += `<div class="modal-item">
+                         <i class="fas fa-check-circle"></i>
+                         <span>${txt}</span>
+                      </div>`;
                 }
             });
 
@@ -540,7 +636,6 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
         renderTable();
     });
 
-    // Cerrar modal al hacer click afuera
     el.modal.overlay.addEventListener('click', (e) => {
         if(e.target === el.modal.overlay) closeDetail();
     });
@@ -585,7 +680,7 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
 
     // INIT
     fetchSheet();
-    // Auto-actualizar cada 60s (aumentado para no saturar)
+    // Auto-actualizar cada 60s
     setInterval(fetchSheet, 60000);  
 
   </script>

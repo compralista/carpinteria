@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Verdulería "El Fresquito" - Pedidos Online</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
@@ -25,6 +25,7 @@
 
 *, *::before, *::after {
     box-sizing: border-box; 
+    -webkit-tap-highlight-color: transparent; /* Elimina flash azul en móbiles al tocar */
 }
 
 body { 
@@ -115,6 +116,7 @@ header h1 {
     align-items: center;
     gap: 8px;
     white-space: nowrap;
+    font-size: 1rem;
 }
 
 .btn-horarios {
@@ -338,6 +340,7 @@ header h1 {
     width: 100%; 
     text-transform: uppercase;
     box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+    font-size: 1rem;
 }
 .producto-card .btn-agregar:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; cursor: not-allowed; }
 .producto-card .btn-agregar:hover:not(:disabled) { background: var(--verde-oscuro); box-shadow: 0 6px 12px rgba(46, 125, 50, 0.3); }
@@ -426,39 +429,66 @@ header h1 {
 #toast { position: fixed; bottom: 30px; right: 30px; background: rgba(46, 125, 50, 0.95); color: white; padding: 16px 30px; border-radius: 50px; font-weight: 600; opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 1001; transform: translateY(20px); }
 #toast.show { opacity: 1; visibility: visible; transform: translateY(0); }
 
-/* --- RESPONSIVE --- */
+/* --- RESPONSIVE OPTIMIZADO PARA MÓVILES --- */
 @media (max-width: 768px) {
+    /* 1. Ajuste General de Texto */
+    body { font-size: 14px; }
+    
     .categorias-sidebar { display: none; }
     
-    header { padding: 15px; flex-direction: column; gap: 15px;}
-    .header-controles { width: 100%; justify-content: center; flex-wrap: wrap; gap: 10px; }
-    .btn-header { flex-grow: 1; justify-content: center; padding: 10px; font-size: 0.9rem;}
+    /* 2. Header Compacto */
+    header { padding: 10px 15px; flex-direction: column; gap: 10px;}
+    .logo-negocio { width: 45px; height: 45px; } /* Logo más chico */
+    header h1 { font-size: 1.3rem; margin-left: 5px;} /* Título más chico */
     
-    .tienda-container { flex-direction: column; margin: 20px auto; padding: 0 15px; gap: 15px;}
-    
-    .header-filtros { 
-        padding: 15px; 
-        flex-direction: column; 
-        align-items: stretch; 
-        gap: 15px;
-        width: 100%; 
+    /* 3. Botones Header Compactos */
+    .header-controles { width: 100%; justify-content: center; flex-wrap: wrap; gap: 8px; }
+    .btn-header { 
+        flex-grow: 1; 
+        justify-content: center; 
+        padding: 8px 12px; /* Menos relleno */
+        font-size: 0.85rem; /* Letra más chica */
     }
+    .estado-local { padding: 5px 12px; font-size: 0.8rem; }
     
-    .titulo-seccion { text-align: center; font-size: 1.4rem; }
-    
-    .controles-filtros { 
-        flex-direction: column; 
-        width: 100%;
-        gap: 12px;
-    }
-    
+    /* 4. Filtros Compactos */
+    .tienda-container { flex-direction: column; margin: 15px auto; padding: 0 10px; gap: 15px;}
+    .header-filtros { padding: 15px; gap: 10px; }
+    .titulo-seccion { text-align: center; font-size: 1.2rem; }
+    .controles-filtros { gap: 10px; }
     .select-categoria, .buscador-input { 
-        width: 100% !important; 
-        max-width: 100%;
+        padding: 8px 15px; /* Inputs más finos */
+        height: 40px;
+        font-size: 0.9rem;
     }
-    .buscador-input:focus { width: 100% !important; }
+
+    /* 5. Grid de Productos (2 columnas en celus grandes, 1 en muy chicos) */
+    .grid-productos { 
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+        gap: 12px; 
+    }
     
-    .grid-productos { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+    /* 6. Tarjeta de Producto Compacta */
+    .producto-card { padding: 12px; } /* Menos borde blanco */
+    .producto-card img { height: 100px; margin-bottom: 10px; } /* Imagen más chica */
+    .producto-card h3 { 
+        font-size: 0.95rem; /* Título prod más chico */
+        min-height: 35px; 
+        margin: 5px 0; 
+        line-height: 1.2;
+    }
+    .producto-card .precio { 
+        font-size: 1.1rem; /* Precio menos invasivo */
+        margin-bottom: 10px; 
+    }
+    .producto-card .btn-agregar {
+        padding: 8px 10px; /* Botón agregar más fino */
+        font-size: 0.85rem;
+    }
+    .producto-card .cinta-oferta { font-size: 0.6rem; padding: 5px 40px; top: 10px; left: -35px; }
+
+    /* 7. Modales en móvil */
+    .modal-content { padding: 20px; width: 95%; }
 }
 </style>
 </head>

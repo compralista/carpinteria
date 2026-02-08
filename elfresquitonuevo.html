@@ -494,24 +494,58 @@ body.dark-mode .btn-flotante {
     opacity: 1;
 }
 
-/* --- RESPONSIVE OPTIMIZADO PARA MÓVILES --- */
+/* --- RESPONSIVE OPTIMIZADO PARA MÓVILES (CORREGIDO) --- */
 @media (max-width: 768px) {
     body { font-size: 14px; }
     .categorias-sidebar { display: none; }
     
     header { padding: 10px 15px; flex-direction: column; gap: 10px;}
     .logo-negocio { width: 45px; height: 45px; } 
-    header h1 { font-size: 1.3rem; margin-left: 5px;}
+    header h1 { font-size: 1.3rem; margin-left: 5px; text-align: center;}
     
     .header-controles { width: 100%; justify-content: center; flex-wrap: wrap; gap: 8px; }
     .btn-header { flex-grow: 1; justify-content: center; padding: 8px 12px; font-size: 0.85rem; }
     .estado-local { padding: 5px 12px; font-size: 0.8rem; }
     
     .tienda-container { flex-direction: column; margin: 15px auto; padding: 0 10px; gap: 15px;}
-    .header-filtros { padding: 15px; gap: 10px; }
-    .titulo-seccion { text-align: center; font-size: 1.2rem; }
-    .controles-filtros { gap: 10px; }
-    .select-categoria, .buscador-input { padding: 8px 15px; height: 40px; font-size: 0.9rem; }
+
+    /* --- FILTROS Y BUSCADOR FULL WIDTH --- */
+    .header-filtros { 
+        padding: 15px; 
+        gap: 15px; 
+        flex-direction: column; /* Apila título y controles */
+        align-items: stretch;   /* Estira los elementos */
+    }
+    
+    .titulo-seccion { 
+        text-align: center; 
+        font-size: 1.2rem; 
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    
+    .controles-filtros { 
+        display: flex;
+        flex-direction: column; /* Pone el select arriba y buscador abajo */
+        gap: 10px; 
+        width: 100%; 
+    }
+    
+    .select-categoria, .buscador-input { 
+        padding: 10px 15px; 
+        height: 45px; /* Más alto para dedo */
+        font-size: 0.95rem; 
+        width: 100% !important;     /* FUERZA el ancho total */
+        min-width: 0 !important;    /* Resetea el ancho mínimo de PC */
+        max-width: none;
+        margin: 0;
+    }
+
+    /* Evitar que el buscador se deforme al escribir en celular */
+    .buscador-input:focus {
+        width: 100% !important;
+    }
+    /* ------------------------------------ */
 
     .grid-productos { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
     
@@ -524,7 +558,6 @@ body.dark-mode .btn-flotante {
 
     .modal-content { padding: 20px; width: 95%; }
     
-    /* Ajuste para que los botones flotantes no molesten en movil */
     .utilidades-container { bottom: 15px; left: 15px; gap: 10px; }
     .btn-flotante { width: 35px; height: 35px; font-size: 1rem; }
 }

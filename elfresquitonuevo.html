@@ -8,13 +8,19 @@
 <style>
 /* --- 🎨 Variables y Estilos Generales --- */
 :root {
+    /* Paleta Clara (Default) */
     --verde-fresco: #4CAF50;
     --verde-oscuro: #2E7D32;
     --verde-claro-bg: #E8F5E9;
     --naranja-acento: #FF9800;
     --rojo-cerrado: #E53935;
+    
     --texto-principal: #37474F;
     --texto-secundario: #546E7A;
+    --bg-body: #f4f7f6;
+    --bg-card: #ffffff;
+    --bg-input: #ffffff;
+    --borde-color: #e0e0e0;
     
     --sombra-sutil: 0 2px 5px rgba(0,0,0,0.05);
     --sombra-media: 0 5px 15px rgba(0,0,0,0.08);
@@ -23,25 +29,44 @@
     --radio-borde: 16px;
 }
 
+/* --- 🌙 Variables Modo Oscuro --- */
+body.dark-mode {
+    --verde-fresco: #66BB6A; /* Verde más brillante para fondo oscuro */
+    --verde-oscuro: #A5D6A7; /* Texto verde más claro */
+    --verde-claro-bg: #1B2E1C; /* Fondo verde muy oscuro */
+    
+    --texto-principal: #E0E0E0;
+    --texto-secundario: #B0BEC5;
+    --bg-body: #121212;
+    --bg-card: #1E1E1E;
+    --bg-input: #2C2C2C;
+    --borde-color: #333333;
+    
+    --sombra-sutil: 0 2px 5px rgba(0,0,0,0.3);
+    --sombra-media: 0 5px 15px rgba(0,0,0,0.5);
+}
+
 *, *::before, *::after {
     box-sizing: border-box; 
-    -webkit-tap-highlight-color: transparent; /* Elimina flash azul en móbiles al tocar */
+    -webkit-tap-highlight-color: transparent; 
 }
 
 body { 
     font-family: 'Roboto', sans-serif; 
     margin: 0; 
-    background-color: #f4f7f6;
-    background-image: linear-gradient(to bottom, var(--verde-claro-bg) 0%, #f4f7f6 400px);
+    background-color: var(--bg-body);
+    /* Gradiente sutil adaptable */
+    background-image: linear-gradient(to bottom, var(--verde-claro-bg) 0%, var(--bg-body) 400px);
     background-attachment: fixed;
     color: var(--texto-principal);
     line-height: 1.6;
-    overflow-x: hidden; 
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* --- Header --- */
 header { 
-    background: linear-gradient(135deg, var(--verde-oscuro), var(--verde-fresco));
+    background: linear-gradient(135deg, #2E7D32, #4CAF50); /* Mantenemos marca siempre verde */
     color: white; 
     display: flex; 
     justify-content: space-between; 
@@ -90,7 +115,7 @@ header h1 {
     border-radius: 30px;
     font-weight: 700;
     font-size: 0.95rem;
-    color: var(--verde-oscuro);
+    color: #2E7D32; /* Siempre verde oscuro dentro del badge blanco */
     background: rgba(255,255,255,0.95);
     display: inline-flex;
     align-items: center;
@@ -156,10 +181,10 @@ header h1 {
     align-items: flex-start;
 }
 
-/* Sidebar Categorías (Visible en Desktop) */
+/* Sidebar Categorías */
 .categorias-sidebar { 
     flex: 0 0 240px; 
-    background: white; 
+    background: var(--bg-card); 
     padding: 25px; 
     border-radius: var(--radio-borde); 
     box-shadow: var(--sombra-media);
@@ -190,21 +215,22 @@ header h1 {
 }
 .categorias-sidebar li a:hover { 
     background: var(--verde-claro-bg); 
-    color: var(--verde-oscuro);
+    color: var(--verde-oscuro); /* En dark mode usa el verde claro */
     transform: translateX(5px);
 }
 .categorias-sidebar li a.activo { 
     background: var(--verde-fresco); 
-    color: white;
+    color: white; /* Siempre blanco en activo */
     font-weight: 600;
     box-shadow: var(--sombra-sutil);
 }
+body.dark-mode .categorias-sidebar li a.activo { color: #121212; font-weight: 700; } 
 
 /* Área de Productos */
 .productos-lista { flex: 1; min-width: 0; }
 
 .header-filtros {
-    background: white;
+    background: var(--bg-card);
     padding: 20px;
     border-radius: var(--radio-borde);
     box-shadow: var(--sombra-sutil);
@@ -236,8 +262,8 @@ header h1 {
 .select-categoria {
     padding: 12px 20px;
     border-radius: 30px;
-    border: 2px solid #e0e0e0;
-    background-color: white;
+    border: 2px solid var(--borde-color);
+    background-color: var(--bg-input);
     font-family: 'Poppins', sans-serif;
     color: var(--texto-principal);
     font-size: 0.95rem;
@@ -258,7 +284,9 @@ header h1 {
 .buscador-input {
     padding: 12px 20px;
     border-radius: 30px;
-    border: 2px solid #e0e0e0;
+    border: 2px solid var(--borde-color);
+    background-color: var(--bg-input);
+    color: var(--texto-principal);
     font-family: 'Poppins', sans-serif;
     outline: none;
     width: 200px;
@@ -277,7 +305,7 @@ header h1 {
 
 /* --- Tarjeta Producto --- */
 .producto-card { 
-    background: white; 
+    background: var(--bg-card); 
     border-radius: var(--radio-borde);
     padding: 25px; 
     text-align: center; 
@@ -298,7 +326,7 @@ header h1 {
     position: absolute;
     top: 12px; left: -32px;
     background: linear-gradient(45deg, var(--naranja-acento), #FFC107);
-    color: var(--texto-principal);
+    color: #37474F; /* Siempre oscuro para contraste */
     font-weight: 800;
     text-transform: uppercase;
     padding: 8px 45px;
@@ -342,7 +370,11 @@ header h1 {
     box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
     font-size: 1rem;
 }
+body.dark-mode .producto-card .btn-agregar { color: #121212; } /* Texto negro en boton verde claro */
+
 .producto-card .btn-agregar:disabled { background: #CFD8DC; color: #90A4AE; box-shadow: none; cursor: not-allowed; }
+body.dark-mode .producto-card .btn-agregar:disabled { background: #424242; color: #757575; }
+
 .producto-card .btn-agregar:hover:not(:disabled) { background: var(--verde-oscuro); box-shadow: 0 6px 12px rgba(46, 125, 50, 0.3); }
 
 /* --- Modales --- */
@@ -355,59 +387,51 @@ header h1 {
 }
 .modal-overlay.visible { visibility: visible; opacity: 1; }
 .modal-content { 
-    background: white; padding: 30px; border-radius: 24px; 
+    background: var(--bg-card); padding: 30px; border-radius: 24px; 
     width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; 
     transform: scale(0.9); transition: all 0.3s;
     box-shadow: var(--sombra-flotante); position: relative;
+    color: var(--texto-principal);
 }
 .modal-overlay.visible .modal-content { transform: scale(1); }
 .modal-close { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 2rem; cursor: pointer; color: #90A4AE; line-height: 1;}
 
-/* --- ESTILOS MEJORADOS PARA LISTA DE HORARIOS --- */
+/* --- Lista Horarios --- */
 .lista-horarios { list-style: none; padding: 0; margin: 10px 0 0 0; display: flex; flex-direction: column; gap: 8px;}
 
 .lista-horarios li { 
-    display: grid; /* Usamos Grid para alineación perfecta */
-    grid-template-columns: 120px 1fr; /* Columna Dia fija, Columna Hora flexible */
+    display: grid; 
+    grid-template-columns: 120px 1fr; 
     align-items: center;
     padding: 12px 15px; 
     border-radius: 12px;
-    background-color: #fcfcfc;
-    border: 1px solid #f0f0f0;
+    background-color: var(--bg-body); /* Adaptable */
+    border: 1px solid var(--borde-color);
     transition: all 0.2s;
 }
 
-/* Día de la semana */
 .horario-dia {
     font-weight: 600;
     color: var(--texto-secundario);
     text-transform: capitalize;
     font-family: 'Poppins', sans-serif;
     font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
+    display: flex; align-items: center; gap: 5px;
 }
-
-/* Texto de la hora */
 .horario-hora {
     font-size: 0.95rem;
     color: var(--texto-principal);
     line-height: 1.4;
 }
-
-/* Estado del día actual */
 .lista-horarios li.dia-actual { 
     background-color: var(--verde-claro-bg); 
     border-color: var(--verde-fresco);
     box-shadow: var(--sombra-sutil);
 }
-
 .lista-horarios li.dia-actual .horario-dia {
     color: var(--verde-oscuro);
     font-weight: 700;
 }
-
 .badge-hoy {
     font-size: 0.7rem;
     background: var(--verde-fresco);
@@ -417,78 +441,92 @@ header h1 {
     margin-left: 5px;
     text-transform: uppercase;
 }
+body.dark-mode .badge-hoy { color: #121212; }
 
-.modal-carrito-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #f0f0f0; }
+.modal-carrito-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--borde-color); }
 .controles-cantidad { display: flex; align-items: center; gap: 8px; }
-.controles-cantidad .btn-cantidad { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 1px solid #ccc; background: #fff;}
+.controles-cantidad .btn-cantidad { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; border: 1px solid var(--borde-color); background: var(--bg-input); color: var(--texto-principal);}
 
-#form-cliente input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box;}
+#form-cliente input { width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid var(--borde-color); border-radius: 12px; box-sizing: border-box; background: var(--bg-input); color: var(--texto-principal);}
 .btn-whatsapp { background: #25D366; color: white; padding: 16px; width: 100%; border: none; border-radius: 50px; cursor: pointer; font-weight: 700; font-size: 1.1rem; display: flex; justify-content: center; gap: 10px; align-items: center;}
 .btn-vaciar { background: none; border: none; color: #E53935; font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
 
 #toast { position: fixed; bottom: 30px; right: 30px; background: rgba(46, 125, 50, 0.95); color: white; padding: 16px 30px; border-radius: 50px; font-weight: 600; opacity: 0; visibility: hidden; transition: all 0.3s; z-index: 1001; transform: translateY(20px); }
 #toast.show { opacity: 1; visibility: visible; transform: translateY(0); }
 
+/* --- 🔧 BOTONES FLOTANTES DISCRETOS --- */
+.utilidades-container {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 900;
+}
+
+.btn-flotante {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,0.6); /* Oscuro semitransparente */
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* En modo oscuro, botones blancos semitransparentes */
+body.dark-mode .btn-flotante {
+    background: rgba(255,255,255,0.2); 
+    color: white;
+}
+
+.btn-flotante:hover {
+    transform: scale(1.1);
+    background: var(--verde-fresco); /* Al hacer hover se pone verde marca */
+    opacity: 1;
+}
+
 /* --- RESPONSIVE OPTIMIZADO PARA MÓVILES --- */
 @media (max-width: 768px) {
-    /* 1. Ajuste General de Texto */
     body { font-size: 14px; }
-    
     .categorias-sidebar { display: none; }
     
-    /* 2. Header Compacto */
     header { padding: 10px 15px; flex-direction: column; gap: 10px;}
-    .logo-negocio { width: 45px; height: 45px; } /* Logo más chico */
-    header h1 { font-size: 1.3rem; margin-left: 5px;} /* Título más chico */
+    .logo-negocio { width: 45px; height: 45px; } 
+    header h1 { font-size: 1.3rem; margin-left: 5px;}
     
-    /* 3. Botones Header Compactos */
     .header-controles { width: 100%; justify-content: center; flex-wrap: wrap; gap: 8px; }
-    .btn-header { 
-        flex-grow: 1; 
-        justify-content: center; 
-        padding: 8px 12px; /* Menos relleno */
-        font-size: 0.85rem; /* Letra más chica */
-    }
+    .btn-header { flex-grow: 1; justify-content: center; padding: 8px 12px; font-size: 0.85rem; }
     .estado-local { padding: 5px 12px; font-size: 0.8rem; }
     
-    /* 4. Filtros Compactos */
     .tienda-container { flex-direction: column; margin: 15px auto; padding: 0 10px; gap: 15px;}
     .header-filtros { padding: 15px; gap: 10px; }
     .titulo-seccion { text-align: center; font-size: 1.2rem; }
     .controles-filtros { gap: 10px; }
-    .select-categoria, .buscador-input { 
-        padding: 8px 15px; /* Inputs más finos */
-        height: 40px;
-        font-size: 0.9rem;
-    }
+    .select-categoria, .buscador-input { padding: 8px 15px; height: 40px; font-size: 0.9rem; }
 
-    /* 5. Grid de Productos (2 columnas en celus grandes, 1 en muy chicos) */
-    .grid-productos { 
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
-        gap: 12px; 
-    }
+    .grid-productos { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
     
-    /* 6. Tarjeta de Producto Compacta */
-    .producto-card { padding: 12px; } /* Menos borde blanco */
-    .producto-card img { height: 100px; margin-bottom: 10px; } /* Imagen más chica */
-    .producto-card h3 { 
-        font-size: 0.95rem; /* Título prod más chico */
-        min-height: 35px; 
-        margin: 5px 0; 
-        line-height: 1.2;
-    }
-    .producto-card .precio { 
-        font-size: 1.1rem; /* Precio menos invasivo */
-        margin-bottom: 10px; 
-    }
-    .producto-card .btn-agregar {
-        padding: 8px 10px; /* Botón agregar más fino */
-        font-size: 0.85rem;
-    }
+    .producto-card { padding: 12px; }
+    .producto-card img { height: 100px; margin-bottom: 10px; }
+    .producto-card h3 { font-size: 0.95rem; min-height: 35px; margin: 5px 0; line-height: 1.2; }
+    .producto-card .precio { font-size: 1.1rem; margin-bottom: 10px; }
+    .producto-card .btn-agregar { padding: 8px 10px; font-size: 0.85rem; }
     .producto-card .cinta-oferta { font-size: 0.6rem; padding: 5px 40px; top: 10px; left: -35px; }
 
-    /* 7. Modales en móvil */
     .modal-content { padding: 20px; width: 95%; }
+    
+    /* Ajuste para que los botones flotantes no molesten en movil */
+    .utilidades-container { bottom: 15px; left: 15px; gap: 10px; }
+    .btn-flotante { width: 35px; height: 35px; font-size: 1rem; }
 }
 </style>
 </head>
@@ -535,6 +573,11 @@ header h1 {
 
 </div>
 
+<div class="utilidades-container">
+    <button id="btn-toggle-tema" class="btn-flotante" title="Cambiar Tema (Día/Noche)">🌙</button>
+    <button id="btn-compartir" class="btn-flotante" title="Compartir Negocio">🔗</button>
+</div>
+
 <div id="modal-horarios" class="modal-overlay">
     <div class="modal-content" style="max-width: 420px;">
         <button class="modal-close" id="btn-cerrar-horarios">×</button>
@@ -556,7 +599,7 @@ header h1 {
              <button id="btn-vaciar-carrito" class="btn-vaciar" style="display:none;">Vaciar Carrito</button>
             <h3 style="margin:0;">Total: <span id="modal-total">$0.00</span></h3>
         </div>
-        <div style="background: #fafafa; padding: 20px; border-radius: 15px; margin-top: 20px;">
+        <div style="background: var(--bg-body); padding: 20px; border-radius: 15px; margin-top: 20px; border: 1px solid var(--borde-color);">
             <h2 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--verde-oscuro);">Envío</h2>
             <form id="form-cliente">
                 <input type="text" id="nombre" placeholder="Nombre completo" required>
@@ -585,6 +628,7 @@ const URL_SHEET_REGISTRO = 'https://script.google.com/macros/s/AKfycbyofyN54TXZd
 const URL_SHEET_HORARIOS = 'https://script.google.com/macros/s/AKfycbxvNRdU68PnP3jInuC0yhMntW5BJm3_NtcHsMacCck2xRt1G2hcateos4ZQP_Yf3-Rr/exec';
 
 const STORAGE_KEY = 'carrito_fresquito_v2';
+const THEME_KEY = 'fresquito_theme';
 
 // Variables de Estado
 let productos = [];
@@ -618,6 +662,10 @@ const indicadorEstado = document.getElementById('indicador-estado');
 const buscador = document.getElementById('buscador');
 const btnVaciar = document.getElementById('btn-vaciar-carrito');
 
+// Botones Flotantes
+const btnToggleTema = document.getElementById('btn-toggle-tema');
+const btnCompartir = document.getElementById('btn-compartir');
+
 // Helpers
 const formatPrice = (p) => `$${Number(p).toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
 function showToast(msg) { toast.textContent = msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3000); }
@@ -626,6 +674,60 @@ function parsearHora(textoHora) {
     const partes = textoHora.toString().split(':');
     return [parseInt(partes[0]), parseInt(partes[1] || 0)];
 }
+
+// --- LOGICA DE TEMA OSCURO ---
+function aplicarTema(esOscuro) {
+    if(esOscuro) {
+        document.body.classList.add('dark-mode');
+        btnToggleTema.textContent = "☀️"; // Cambiar icono a sol
+    } else {
+        document.body.classList.remove('dark-mode');
+        btnToggleTema.textContent = "🌙"; // Cambiar icono a luna
+    }
+}
+
+// Cargar preferencia
+const temaGuardado = localStorage.getItem(THEME_KEY);
+if(temaGuardado === 'dark') {
+    aplicarTema(true);
+}
+
+btnToggleTema.addEventListener('click', () => {
+    const esOscuro = document.body.classList.toggle('dark-mode');
+    if(esOscuro) {
+        btnToggleTema.textContent = "☀️";
+        localStorage.setItem(THEME_KEY, 'dark');
+    } else {
+        btnToggleTema.textContent = "🌙";
+        localStorage.setItem(THEME_KEY, 'light');
+    }
+});
+
+// --- LOGICA COMPARTIR ---
+btnCompartir.addEventListener('click', async () => {
+    const shareData = {
+        title: 'Verdulería "El Fresquito"',
+        text: '¡Mirá los productos frescos que tiene El Fresquito! Pedi online:',
+        url: window.location.href
+    };
+
+    if (navigator.share) {
+        try {
+            await navigator.share(shareData);
+        } catch (err) {
+            console.log('Error al compartir', err);
+        }
+    } else {
+        // Fallback para PC
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            showToast("🔗 ¡Enlace copiado!");
+        } catch (err) {
+            prompt("Copia este enlace para compartir:", window.location.href);
+        }
+    }
+});
+
 
 // --- LÓGICA DE HORARIOS DINÁMICA ---
 async function cargarHorariosRemotos() {
@@ -659,7 +761,6 @@ async function cargarHorariosRemotos() {
                     rangosLogicos.push([...parsearHora(item.t_inicio), ...parsearHora(item.t_fin)]);
                 }
                 
-                // Formato lindo para horas: "09:00 a 13:00hs <br> 17:00 a 21:00hs"
                 textoVisual = partesTexto.length > 0 ? partesTexto.join('<br>') : "Cerrado";
             }
 
@@ -674,7 +775,6 @@ async function cargarHorariosRemotos() {
                 etiquetaHoy = `<span class="badge-hoy">HOY</span>`;
             }
 
-            // HTML Estructurado para CSS Grid
             li.innerHTML = `
                 <div class="horario-dia">${diaRaw} ${etiquetaHoy}</div> 
                 <div class="horario-hora">${textoVisual}</div>
@@ -705,7 +805,6 @@ function verificarEstadoNegocio() {
     const tiempoActual = horaActual * 60 + minActual;
 
     if(listaHorariosUL.children.length > 0) {
-        // Remover clase de todos
         Array.from(listaHorariosUL.children).forEach(li => {
             li.classList.remove('dia-actual');
             const diaDiv = li.querySelector('.horario-dia');
@@ -714,8 +813,6 @@ function verificarEstadoNegocio() {
                 if(badge) badge.remove();
             }
         });
-        
-        // Agregar clase al de hoy
         const liHoy = listaHorariosUL.querySelector(`li[data-dia="${diaSemana}"]`);
         if(liHoy) {
             liHoy.classList.add('dia-actual');

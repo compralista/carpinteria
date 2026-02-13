@@ -110,23 +110,57 @@ header h1 {
     gap: 20px;
 }
 
+/* --- Nuevo Cartel de Estado Profesional --- */
 .estado-local {
-    padding: 8px 16px;
-    border-radius: 30px;
+    padding: 8px 18px;
+    border-radius: 50px;
     font-weight: 700;
-    font-size: 0.95rem;
-    color: #2E7D32; /* Siempre verde oscuro dentro del badge blanco */
-    background: rgba(255,255,255,0.95);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     display: inline-flex;
     align-items: center;
-    box-shadow: var(--sombra-sutil);
-    border: 2px solid transparent;
+    gap: 10px; /* Espacio para el punto animado */
+    color: var(--verde-oscuro);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     white-space: nowrap;
 }
+
+/* Punto indicador animado (Abierto) */
+.estado-local::before {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #00C853; /* Verde brillante */
+    box-shadow: 0 0 8px rgba(0, 200, 83, 0.6);
+    animation: pulso-abierto 2s infinite;
+}
+
+/* Estado Cerrado */
 .estado-local.cerrado {
-    color: var(--rojo-cerrado);
-    background: #FFEBEE;
-    border-color: var(--rojo-cerrado);
+    color: #C62828;
+    background: rgba(255, 235, 238, 0.95);
+    border-color: rgba(229, 57, 53, 0.2);
+}
+
+/* Punto indicador estático (Cerrado) */
+.estado-local.cerrado::before {
+    background-color: var(--rojo-cerrado);
+    box-shadow: none;
+    animation: none; /* Sin pulso cuando está cerrado */
+}
+
+/* Animación de pulso */
+@keyframes pulso-abierto {
+    0% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(0, 200, 83, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 200, 83, 0); }
 }
 
 .btn-header { 
@@ -873,11 +907,11 @@ function verificarEstadoNegocio() {
     negocioAbierto = estaAbierto;
     
     if (negocioAbierto) {
-        indicadorEstado.textContent = "🟢 Abierto";
+        indicadorEstado.textContent = "Abierto";
         indicadorEstado.classList.remove('cerrado');
         btnVerCarrito.classList.remove('deshabilitado');
     } else {
-        indicadorEstado.textContent = "🔴 Cerrado";
+        indicadorEstado.textContent = "Cerrado";
         indicadorEstado.classList.add('cerrado');
     }
     actualizarBotonesProductos();

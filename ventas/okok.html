@@ -7,6 +7,9 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- LIBRERÍA PARA GENERAR PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     /* --- VARIABLES SIERRAS WEB --- */
@@ -188,12 +191,14 @@
         color: var(--text-muted);
     }
 
-    /* Botones de tabla WA */
+    /* Botones de tabla WA y PDF */
     .btn-wa { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; text-decoration: none; font-size: 1.1rem; transition: all 0.2s; border: 1px solid transparent;}
     .btn-wa-client { background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.2); } 
     .btn-wa-client:hover { background: var(--success); color: white; }
     .btn-wa-support { background: rgba(245, 158, 11, 0.1); color: var(--warning); border-color: rgba(245, 158, 11, 0.2); margin-left: 5px; } 
     .btn-wa-support:hover { background: var(--warning); color: white; }
+    .btn-wa-pdf { background: rgba(2, 132, 199, 0.1); color: var(--primary); border-color: rgba(2, 132, 199, 0.2); margin-left: 5px; } 
+    .btn-wa-pdf:hover { background: var(--primary); color: white; }
 
     /* Paginación */
     #pager { padding: 20px; display: flex; justify-content: center; gap: 8px; border-top: 1px solid var(--border); }
@@ -411,7 +416,7 @@
       }
     });
 
-    // ===== CONFIGURACIÓN (Intacta) =====
+    // ===== CONFIGURACIÓN =====
     const APP_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzdZ1Qsrzqopm4g4s0NZJK7AKm6plFVoKvpWdymZ-MOIAktQCWsa6Ki4te4UqJUfnfK/exec';
     const telefonoNegocio = '5492664212722';
     const nombreNegocio = "El Fresquito";
@@ -664,6 +669,10 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
                        target="_blank" class="btn-wa btn-wa-support" title="Reportar Error Interno">
                        <i class="fas fa-headset"></i>
                     </a>
+                    <a href="#" onclick="event.preventDefault(); generarYEnviarTicket('${row.id}')" 
+                       class="btn-wa btn-wa-pdf" title="Generar Ticket PDF">
+                       <i class="fas fa-file-pdf"></i>
+                    </a>
                 </td>
             `;
             el.tableBody.appendChild(tr);
@@ -734,6 +743,59 @@ Te avisaremos cuando esté listo. ¡Gracias!`;
     window.closeDetail = function() {
         el.modal.overlay.style.display = 'none';
     }
+
+    // --- GENERAR Y ENVIAR TICKET PDF ---
+    window.generarYEnviarTicket = function(id) {
+      const venta = rawData.find(r => String(r.id) === String(id));
+      if(!venta) return;
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      doc.setFillColor(240, 240, 240);
+      doc.rect(10, 10, 190, 35, 'F');
+      
+      doc.setFontSize(22);
+      doc.setTextColor(30, 30, 30);
+      doc.text("TICKET DE COMPRA", 105, 25, null, null, "center");
+      
+      doc.setFontSize(12);
+      doc.text(`ID de Pedido: #${venta.id}`, 105, 35, null, null, "center");
+      
+      doc.setFontSize(11);
+      doc.setTextColor(50, 50, 50);
+      doc.text("-----------------------------------------------------------------------------------------", 20, 55);
+      doc.text(`Fecha: ${formatDate(venta._date)}`, 20, 65);
+      doc.text(`Cliente: ${venta.nombre_cliente}`, 20, 75);
+      doc.text(`Celular: ${venta.celular_cliente}`, 20, 85);
+      doc.text("-----------------------------------------------------------------------------------------", 20, 95);
+      
+      doc.setFontSize(13);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Detalle del Pedido:", 20, 110);
+      
+      doc.setFontSize(11);
+      doc.setTextColor(50, 50, 50);
+      
+      const splitDetail = doc.splitTextToSize(venta.detalle_compra, 170);
+      doc.text(splitDetail, 20, 120);
+      
+      const totalY = 120 + (splitDetail.length * 6) + 15;
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`TOTAL: ${formatMoney(venta.total)}`, 20, totalY);
+      
+      doc.save(`Ticket_Pedido_${venta.id}.pdf`);
+      
+      let phone = String(venta.celular_cliente).replace(/\D/g, '');
+      if(phone.length === 10) phone = '549' + phone; 
+      
+      const msg = `¡Hola ${venta.nombre_cliente}! Muchas gracias por tu compra en ${nombreNegocio}. Acá te adjunto el ticket de tu pedido #${venta.id} por un total de ${formatMoney(venta.total)}.`;
+      
+      setTimeout(() => {
+        window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+      }, 1000);
+    };
 
     // --- EVENTOS ---
     el.inputs.search.addEventListener('input', applyFilters);
